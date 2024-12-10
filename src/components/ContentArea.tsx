@@ -42,8 +42,8 @@ export const ContentArea: React.FC = () => {
   };
 
   return (
-    <div className="h-full" onMouseUp={handleMouseUp}>
-      <div className="bg-[#505050] py-3 px-2 mb-1 flex items-center justify-between">
+    <div className="h-full relative" onMouseUp={handleMouseUp}>
+      <div className="bg-[#505050] absolute top-0 left-0 right-0 py-3 px-2 mb-1 flex items-center justify-between">
         <h1 className="text-xl text-white font-bold">Verification Document</h1>
         <div className="flex items-center gap-2">
           <p className="text-sm text-white font-semibold">Show Edits</p>
@@ -60,6 +60,9 @@ export const ContentArea: React.FC = () => {
               selectedKey,
               showEdit
             )}
+            style={{
+              marginTop: "3rem",
+            }}
           />
         ) : (
           <Loading />
