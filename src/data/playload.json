@@ -1,0 +1,32 @@
+{
+  "Party_A": {
+    "value": "JPMorgan Chase Bank, N.A., Mumbai Branch (\"JPMorgan\")",
+    "modified_value": null,
+    "status": "pending"
+  },
+  "Party_B": {
+    "value": "Customer",
+    "modified_value": null,
+    "status": "pending"
+  },
+  "Trade_date": {
+    "value": "16 October 23",
+    "modified_value": null,
+    "status": "pending"
+  },
+  "Effective_date": {
+    "value": "23-October-2024",
+    "modified_value": null,
+    "status": "pending"
+  },
+  "Termination_date": {
+    "value": "22-October-2034",
+    "modified_value": null,
+    "status": "pending"
+  },
+  "Notional": {
+    "value": "1,000,000",
+    "modified_value": null,
+    "status": "pending"
+  }
+}
