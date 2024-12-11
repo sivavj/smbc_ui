@@ -2,57 +2,84 @@ import MDEditor from "@uiw/react-md-editor";
 import { useEffect, useRef, useState } from "react";
 import { content } from "../data/content";
 
+const jsonKeys = {
+  Party_A: {
+    value: "JPMorgan Chase Bank, N.A., Mumbai Branch (\"JPMorgan\")",
+    modified_value: null,
+    status: "pending",
+  },
+  Party_B: {
+    value: "Customer",
+    modified_value: null,
+    status: "pending",
+  },
+  Trade_date: {
+    value: "16 October 23",
+    modified_value: null,
+    status: "pending",
+  },
+  Effective_date: {
+    value: "23-October-2024",
+    modified_value: null,
+    status: "pending",
+  },
+  Termination_date: {
+    value: "22-October-2034",
+    modified_value: null,
+    status: "pending",
+  },
+  Notional: {
+    value: "1,000,000",
+    modified_value: null,
+    status: "pending",
+  },
+};
+
 const App = () => {
   const [cursorPosition, setCursorPosition] = useState({ line: 0, column: 0 });
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [matchedPosition, setMatchedPosition] = useState<{ line: number; column: number } | null>(null);
   const previewRef = useRef<HTMLDivElement | null>(null);
 
-  const getCursorPosition = () => {
-    if (!previewRef.current) return;
+  const findKeyPosition = (key: string) => {
+    if (!previewRef.current) return null;
 
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+    const span = previewRef.current.querySelector(`span[id="${key}"]`);
+    if (!span) return null;
 
-    const range = selection.getRangeAt(0);
-    const startNode = range.startContainer;
-    const startOffset = range.startOffset;
+    let line = 1;
+    let column = 1;
 
-    let line = 1; // Start with line 1
-    let column = 1; // Start with column 1
-    let found = false;
-
-    // Traverse child nodes to calculate line and column
     const walker = document.createTreeWalker(previewRef.current, NodeFilter.SHOW_TEXT, null);
 
     while (walker.nextNode()) {
       const currentNode = walker.currentNode as Text;
 
-      if (currentNode === startNode) {
-        // Count lines and columns in the selected node
-        const contentBeforeCursor = currentNode.textContent?.slice(0, startOffset) || "";
+      if (currentNode === span.firstChild) {
+        const contentBeforeCursor = currentNode.textContent || "";
         line += (contentBeforeCursor.match(/\n/g) || []).length;
-        column = startOffset - (contentBeforeCursor.lastIndexOf("\n") + 1);
-        found = true;
+        column = contentBeforeCursor.length - (contentBeforeCursor.lastIndexOf("\n") + 1);
         break;
       }
 
-      // Update line count based on current node's text
       const nodeText = currentNode.textContent || "";
       line += (nodeText.match(/\n/g) || []).length;
-
-      // Update column only if no newlines are present
-      if (!nodeText.includes("\n")) {
-        column += nodeText.length;
-      } else {
-        column = nodeText.length - nodeText.lastIndexOf("\n");
-      }
     }
+    setCursorPosition({ line, column });
+    return { line, column };
+  };
 
-    if (found) setCursorPosition({ line, column });
+  const handleKeySelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const key = e.target.value;
+    setSelectedKey(key);
+
+    const position = findKeyPosition(key);
+    setMatchedPosition(position || null);
   };
 
   useEffect(() => {
     const handleSelectionChange = () => {
-      getCursorPosition();
+      // Update cursor position logic here if needed.
     };
 
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -65,9 +92,29 @@ const App = () => {
   return (
     <div className="container mx-auto min-h-screen flex flex-col">
       <div className="bg-gray-100 fixed top-0 left-0 right-0 py-3 px-2 shadow-md mb-1 flex items-center justify-between">
-        <span>
+        <div>
           Ln: {cursorPosition.line}, Col: {cursorPosition.column}
-        </span>
+        </div>
+        <div className="flex items-center">
+          <label htmlFor="key-select" className="mr-2">
+            Select JSON Key:
+          </label>
+          <select
+            id="key-select"
+            className="border px-2 py-1"
+            onChange={handleKeySelect}
+            value={selectedKey || ""}
+          >
+            <option value="" disabled>
+              Select a key
+            </option>
+            {Object.keys(jsonKeys).map((key) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       <div
         ref={previewRef}
@@ -78,8 +125,15 @@ const App = () => {
           userSelect: "text",
         }}
       >
-        <MDEditor.Markdown source={content} />
+        <MDEditor.Markdown
+          source={content}
+        />
       </div>
+      {matchedPosition && (
+        <div className="mt-4 p-4 bg-green-100 border border-green-300 rounded">
+          <strong>Matched Position:</strong> Ln: {matchedPosition.line}, Col: {matchedPosition.column}
+        </div>
+      )}
     </div>
   );
 };

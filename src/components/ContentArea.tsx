@@ -12,12 +12,51 @@ export const ContentArea: React.FC<{
       column: number;
     }>
   >;
-}> = ({setCursorPosition}) => {
+}> = ({ setCursorPosition }) => {
   const [showEdit, setShowEdit] = useState<boolean>(true);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markdownRef = useRef<any>(null);
-  
   const previewRef = useRef<HTMLDivElement | null>(null);
+
+  const jsonData = useJsonStore((state) => state.jsonData);
+  const selectedKey = useJsonStore((state) => state.selectedKey);
+  const onSelectKey = useJsonStore((state) => state.onSelectKey);
+  const onSelectContent = useJsonStore((state) => state.onSelectContent);
+  const markdownContent = useJsonStore((state) => state.markdownContent);
+
+  const findKeyPosition = (key: string) => {
+    if (!previewRef.current) return null;
+
+    const span = previewRef.current.querySelector(`span[id="${key}"]`);
+    if (!span) return null;
+
+    let line = 1;
+    let column = 1;
+
+    const walker = document.createTreeWalker(
+      previewRef.current,
+      NodeFilter.SHOW_TEXT,
+      null
+    );
+
+    while (walker.nextNode()) {
+      const currentNode = walker.currentNode as Text;
+
+      if (currentNode === span.firstChild) {
+        const contentBeforeCursor = currentNode.textContent || "";
+        line += (contentBeforeCursor.match(/\n/g) || []).length;
+        column =
+          contentBeforeCursor.length -
+          (contentBeforeCursor.lastIndexOf("\n") + 1);
+        break;
+      }
+
+      const nodeText = currentNode.textContent || "";
+      line += (nodeText.match(/\n/g) || []).length;
+    }
+    setCursorPosition({ line, column });
+    return { line, column };
+  };
 
   const getCursorPosition = () => {
     if (!previewRef.current) return;
@@ -78,14 +117,8 @@ export const ContentArea: React.FC<{
     return () => {
       document.removeEventListener("selectionchange", handleSelectionChange);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const jsonData = useJsonStore((state) => state.jsonData);
-  const selectedKey = useJsonStore((state) => state.selectedKey);
-  const onSelectKey = useJsonStore((state) => state.onSelectKey);
-  const onSelectContent = useJsonStore((state) => state.onSelectContent);
-  const markdownContent = useJsonStore((state) => state.markdownContent);
 
   const handleMouseUp = () => {
     onSelectKey(null);
@@ -99,12 +132,14 @@ export const ContentArea: React.FC<{
 
   useEffect(() => {
     if (selectedKey) {
+      findKeyPosition(selectedKey);
       const selectedSpan = document.getElementById(selectedKey);
       if (selectedSpan) {
         selectedSpan.scrollIntoView({ behavior: "smooth", block: "center" });
         selectedSpan.focus();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedKey]);
 
   const onToggle = (state: boolean) => {
