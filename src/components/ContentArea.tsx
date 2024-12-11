@@ -26,37 +26,25 @@ export const ContentArea: React.FC<{
 
   const findKeyPosition = (key: string) => {
     if (!previewRef.current) return null;
-
+  
     const span = previewRef.current.querySelector(`span[id="${key}"]`);
     if (!span) return null;
-
-    let line = 1;
-    let column = 1;
-
-    const walker = document.createTreeWalker(
-      previewRef.current,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
-
-    while (walker.nextNode()) {
-      const currentNode = walker.currentNode as Text;
-
-      if (currentNode === span.firstChild) {
-        const contentBeforeCursor = currentNode.textContent || "";
-        line += (contentBeforeCursor.match(/\n/g) || []).length;
-        column =
-          contentBeforeCursor.length -
-          (contentBeforeCursor.lastIndexOf("\n") + 1);
-        break;
-      }
-
-      const nodeText = currentNode.textContent || "";
-      line += (nodeText.match(/\n/g) || []).length;
-    }
+  
+    const range = document.createRange();
+    range.selectNode(span);
+    range.setStart(previewRef.current, 0);
+  
+    const rangeText = range.toString(); // Get text from start to the `span`
+    const lines = rangeText.split("\n");
+    const lastLine = lines[lines.length - 1];
+  
+    const line = lines.length;
+    const column = lastLine.length + 1; // +1 for the column to be 1-based
+  
     setCursorPosition({ line, column });
     return { line, column };
   };
+  
 
   const getCursorPosition = () => {
     if (!previewRef.current) return;
