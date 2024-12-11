@@ -49,7 +49,10 @@ export const ContentArea: React.FC<{
 
   useEffect(() => {
     if (selectedKey) {
-      findKeyPosition(selectedKey, previewRef, setCursorPosition);
+      const currentValue = jsonData[selectedKey].modified_value
+        ? jsonData[selectedKey].modified_value
+        : jsonData[selectedKey].value;
+      findKeyPosition(selectedKey, currentValue, previewRef, setCursorPosition);
       const selectedSpan = document.getElementById(selectedKey);
       if (selectedSpan) {
         selectedSpan.scrollIntoView({ behavior: "smooth", block: "center" });

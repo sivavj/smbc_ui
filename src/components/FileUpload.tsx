@@ -111,7 +111,7 @@ export const FileUpload = () => {
       if (response.ok) {
         setUploadedFile({ ...fileToUpload, status: "completed" });
         const data = await response.json();
-        onSetJsonData(JSON.parse(data.json_data));
+        onSetJsonData(data.json_data);
         onSetMarkdownContent(removeEscapedChars(data.markdown_text));
         setIsDialogOpen(false);
       } else {

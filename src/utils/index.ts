@@ -127,8 +127,15 @@ export const removeEscapedChars = (str: string) => {
   return str.replace(/\\"/g, '"').replace(/\\\\/g, "");
 };
 
+function getValuePosition(line: string, value: string): number {
+  // Find the index of the value in the line
+  const index = line.indexOf(value);
+  return index; // Returns the index of the first occurrence, or -1 if not found
+}
+
 export const findKeyPosition = (
   key: string,
+  value: string,
   previewRef: React.MutableRefObject<HTMLDivElement | null>,
   setCursorPosition: ({
     line,
@@ -152,7 +159,7 @@ export const findKeyPosition = (
   const lastLine = lines[lines.length - 1];
 
   const line = lines.length;
-  const column = lastLine.length + 1; // +1 for the column to be 1-based
+  const column =  getValuePosition(lastLine, value);; // +1 for the column to be 1-based
 
   setCursorPosition({ line, column });
   return { line, column };
