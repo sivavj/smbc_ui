@@ -47,25 +47,32 @@ export const FileUpload = () => {
   const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     const file = event.dataTransfer.files ? event.dataTransfer.files[0] : null;
-
+  
     if (!file) return;
-
+  
+    // Check if the file is a PDF
+    if (file.type !== "application/pdf") {
+      setErrorMessage("Only PDF files are allowed.");
+      return;
+    }
+  
     const fileSizeMB = file.size / (1024 * 1024); // Convert bytes to MB
-
+  
     if (fileSizeMB > MAX_FILE_SIZE_MB) {
       setErrorMessage(`File size exceeds ${MAX_FILE_SIZE_MB} MB.`);
       return;
     }
-
+  
     const newFile: UploadedFile = {
       file,
       progress: 0,
       status: "pending",
     };
-
+  
     setUploadedFile(newFile);
     setErrorMessage("");
   };
+  
 
   const uploadFile = async () => {
     if (!uploadedFile) return;
