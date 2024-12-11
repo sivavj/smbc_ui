@@ -64,27 +64,55 @@ const useJsonStore = create<JsonStore>((set) => ({
       };
     }),
   accept: (key) =>
-    set((state) => ({
-      jsonData: {
-        ...state.jsonData,
-        [key]: { ...state.jsonData[key], status: "accepted" },
-      },
-      counts: {
-        ...state.counts,
-        accepted: state.counts.accepted + 1,
-      },
-    })),
+    set((state) => {
+      const currentStatus = state.jsonData[key]?.status;
+
+      const newCounts = { ...state.counts };
+      if (currentStatus === "accepted") {
+        // If already accepted, decrease accepted count
+        newCounts.accepted -= 1;
+      } else if (currentStatus === "rejected") {
+        // If previously rejected, increase accepted count and decrease rejected count
+        newCounts.accepted += 1;
+        newCounts.rejected -= 1;
+      } else {
+        // If pending, increase accepted count
+        newCounts.accepted += 1;
+      }
+
+      return {
+        jsonData: {
+          ...state.jsonData,
+          [key]: { ...state.jsonData[key], status: "accepted" },
+        },
+        counts: newCounts,
+      };
+    }),
   reject: (key) =>
-    set((state) => ({
-      jsonData: {
-        ...state.jsonData,
-        [key]: { ...state.jsonData[key], status: "rejected" },
-      },
-      counts: {
-        ...state.counts,
-        rejected: state.counts.rejected + 1,
-      },
-    })),
+    set((state) => {
+      const currentStatus = state.jsonData[key]?.status;
+
+      const newCounts = { ...state.counts };
+      if (currentStatus === "rejected") {
+        // If already rejected, decrease rejected count
+        newCounts.rejected -= 1;
+      } else if (currentStatus === "accepted") {
+        // If previously accepted, increase rejected count and decrease accepted count
+        newCounts.rejected += 1;
+        newCounts.accepted -= 1;
+      } else {
+        // If pending, increase rejected count
+        newCounts.rejected += 1;
+      }
+
+      return {
+        jsonData: {
+          ...state.jsonData,
+          [key]: { ...state.jsonData[key], status: "rejected" },
+        },
+        counts: newCounts,
+      };
+    }),
   add: (key, value) =>
     set((state) => ({
       jsonData: {
@@ -97,20 +125,33 @@ const useJsonStore = create<JsonStore>((set) => ({
       },
     })),
   edit: (key, newValue) =>
-    set((state) => ({
-      jsonData: {
-        ...state.jsonData,
-        [key]: {
-          ...state.jsonData[key],
-          modified_value: newValue,
-          status: "edited",
+    set((state) => {
+      const currentStatus = state.jsonData[key]?.status;
+
+      const newCounts = { ...state.counts };
+      if (currentStatus === "accepted") {
+        // If previously accepted, decrease accepted count
+        newCounts.accepted -= 1;
+      } else if (currentStatus === "rejected") {
+        // If previously rejected, decrease rejected count
+        newCounts.rejected -= 1;
+      }
+
+      // Increase edited count as the entry is being edited
+      newCounts.edited += 1;
+
+      return {
+        jsonData: {
+          ...state.jsonData,
+          [key]: {
+            ...state.jsonData[key],
+            modified_value: newValue,
+            status: "edited",
+          },
         },
-      },
-      counts: {
-        ...state.counts,
-        edited: state.counts.edited + 1,
-      },
-    })),
+        counts: newCounts,
+      };
+    }),
   onSelectKey: (key: string | null) => set({ selectedKey: key }),
 }));
 
