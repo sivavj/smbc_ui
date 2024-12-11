@@ -32,7 +32,7 @@ export const Sidebar: React.FC = () => {
   const selectedKey = useJsonStore((state) => state.selectedKey);
   const onSelectKey = useJsonStore((state) => state.onSelectKey);
   const acceptAll = useJsonStore((state) => state.acceptAll);
-  const counts = useJsonStore((state) => state.counts);
+  const onSelectContent = useJsonStore((state) => state.onSelectContent);
 
   const isReadyToSend = Object.values(jsonData).every(
     (item) => item.status !== "pending"
@@ -44,6 +44,7 @@ export const Sidebar: React.FC = () => {
 
   const handleClick = (key: string) => {
     onSelectKey(key);
+    onSelectContent("");
   };
 
   // Function to handle down arrow click
@@ -52,6 +53,7 @@ export const Sidebar: React.FC = () => {
     const currentIndex = keys.indexOf(selectedKey);
     const nextIndex = (currentIndex + 1) % keys.length; // Loop back to the first item
     onSelectKey(keys[nextIndex]);
+    onSelectContent("");
   };
 
   // Function to handle up arrow click
@@ -60,6 +62,7 @@ export const Sidebar: React.FC = () => {
     const currentIndex = keys.indexOf(selectedKey);
     const prevIndex = (currentIndex - 1 + keys.length) % keys.length; // Loop to the last item
     onSelectKey(keys[prevIndex]);
+    onSelectContent("");
   };
 
   // Function to open the confirmation modal
@@ -101,7 +104,9 @@ export const Sidebar: React.FC = () => {
       </div>
       <div className="m-4">
         <button
-          className={`${!isReadyToSend ? "bg-blue-500" : "bg-blue-200"} text-white p-3 w-full flex items-center justify-center gap-2 rounded-md`}
+          className={`${
+            !isReadyToSend ? "bg-blue-500" : "bg-blue-200"
+          } text-white p-3 w-full flex items-center justify-center gap-2 rounded-md`}
           onClick={handleAcceptAllClick}
           disabled={isReadyToSend}
         >
@@ -142,20 +147,6 @@ export const Sidebar: React.FC = () => {
         onConfirm={handleConfirmAcceptAll}
         onClose={handleCloseModal}
       />
-      <div className="absolute bottom-0 w-full flex justify-between items-center p-4 bg-gray-100 border-t text-black shadow-md gap-x-4">
-        <p className="flex gap-2 text-center">
-          Edited: <strong>{counts.edited}</strong>
-        </p>
-        <p className="flex gap-2 text-center">
-          Added: <strong>{counts.added}</strong>
-        </p>
-        <p className="flex gap-2 text-center">
-          Accepted: <strong>{counts.accepted}</strong>
-        </p>
-        <p className="flex gap-2 text-center">
-          Rejected: <strong>{counts.rejected}</strong>
-        </p>
-      </div>
     </div>
   );
 };

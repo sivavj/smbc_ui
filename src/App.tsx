@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { ContentArea, Header, Sidebar } from "./components";
+import { ContentArea, Footer, Header, Sidebar } from "./components";
 import { content } from "./data/content";
-import useJsonStore from "./store/jsonStore";
 import payload from "./data/playload.json";
+import useJsonStore from "./store/jsonStore";
 
 function App() {
   const onSetJsonData = useJsonStore((state) => state.onSetJsonData);
@@ -39,6 +39,7 @@ function App() {
           <ContentArea />
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -5,3 +5,4 @@ export * from "./ToggleSwitch";
 export * from "./Loading";
 export * from "./ConfirmationDialog";
 export * from "./SidebarSkeleton";
+export * from "./Footer";

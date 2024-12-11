@@ -141,3 +141,7 @@ export function bytesToMB(bytes: number) {
   const mb = bytes / (1024 * 1024);
   return mb.toFixed(2);
 }
+
+export const removeEscapedChars = (str: string) => {
+  return str.replace(/\\"/g, '"').replace(/\\\\/g, "");
+};
