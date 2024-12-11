@@ -159,7 +159,7 @@ export const findKeyPosition = (
   const lastLine = lines[lines.length - 1];
 
   const line = lines.length;
-  const column =  getValuePosition(lastLine, value);; // +1 for the column to be 1-based
+  const column =  getValuePosition(lastLine, value);
 
   setCursorPosition({ line, column });
   return { line, column };
