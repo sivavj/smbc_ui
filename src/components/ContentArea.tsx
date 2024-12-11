@@ -5,10 +5,81 @@ import { highlightContent } from "../utils";
 import { ToggleSwitch } from "./ToggleSwitch";
 import { Loading } from "./Loading";
 
-export const ContentArea: React.FC = () => {
+export const ContentArea: React.FC<{
+  setCursorPosition: React.Dispatch<
+    React.SetStateAction<{
+      line: number;
+      column: number;
+    }>
+  >;
+}> = ({setCursorPosition}) => {
   const [showEdit, setShowEdit] = useState<boolean>(true);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markdownRef = useRef<any>(null);
+  
+  const previewRef = useRef<HTMLDivElement | null>(null);
+
+  const getCursorPosition = () => {
+    if (!previewRef.current) return;
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const startNode = range.startContainer;
+    const startOffset = range.startOffset;
+
+    let line = 1; // Start with line 1
+    let column = 1; // Start with column 1
+    let found = false;
+
+    // Traverse child nodes to calculate line and column
+    const walker = document.createTreeWalker(
+      previewRef.current,
+      NodeFilter.SHOW_TEXT,
+      null
+    );
+
+    while (walker.nextNode()) {
+      const currentNode = walker.currentNode as Text;
+
+      if (currentNode === startNode) {
+        // Count lines and columns in the selected node
+        const contentBeforeCursor =
+          currentNode.textContent?.slice(0, startOffset) || "";
+        line += (contentBeforeCursor.match(/\n/g) || []).length;
+        column = startOffset - (contentBeforeCursor.lastIndexOf("\n") + 1);
+        found = true;
+        break;
+      }
+
+      // Update line count based on current node's text
+      const nodeText = currentNode.textContent || "";
+      line += (nodeText.match(/\n/g) || []).length;
+
+      // Update column only if no newlines are present
+      if (!nodeText.includes("\n")) {
+        column += nodeText.length;
+      } else {
+        column = nodeText.length - nodeText.lastIndexOf("\n");
+      }
+    }
+
+    if (found) setCursorPosition({ line, column });
+  };
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      getCursorPosition();
+    };
+
+    document.addEventListener("selectionchange", handleSelectionChange);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const jsonData = useJsonStore((state) => state.jsonData);
   const selectedKey = useJsonStore((state) => state.selectedKey);
@@ -50,7 +121,10 @@ export const ContentArea: React.FC = () => {
           <ToggleSwitch onToggle={onToggle} initialState={showEdit} />
         </div>
       </div>
-      <div className="bg-white p-4 rounded-md shadow-md border border-gray-200 h-full overflow-auto">
+      <div
+        ref={previewRef}
+        className="bg-white p-4 rounded-md shadow-md border border-gray-200 h-full overflow-auto"
+      >
         {markdownContent ? (
           <MDEditor.Markdown
             ref={markdownRef}

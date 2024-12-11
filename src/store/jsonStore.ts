@@ -117,7 +117,7 @@ const useJsonStore = create<JsonStore>((set) => ({
     set((state) => ({
       jsonData: {
         ...state.jsonData,
-        [key]: { value, modified_value: null, status: "pending" },
+        [key]: { value, modified_value: null, status: "pending", isAdded: true },
       },
       counts: {
         ...state.counts,

@@ -1,6 +1,8 @@
 import useJsonStore from "../store/jsonStore";
 
-export const Footer = () => {
+export const Footer: React.FC<{
+  cursorPosition: { line: number; column: number };
+}> = ({ cursorPosition }) => {
   const counts = useJsonStore((state) => state.counts);
   return (
     <div className="fixed bottom-0 left-0 right-0">
@@ -26,10 +28,10 @@ export const Footer = () => {
             <div className="w-full flex justify-between items-center text-black gap-x-4">
               <div className="flex items-center gap-2">
                 <p className="flex gap-2 text-center">
-                  Ln: <strong>0</strong>
+                  Ln: <strong>{cursorPosition.line}</strong>
                 </p>
                 <p className="flex gap-2 text-center">
-                  Col: <strong>0</strong>
+                  Col: <strong>{cursorPosition.column}</strong>
                 </p>
               </div>
             </div>

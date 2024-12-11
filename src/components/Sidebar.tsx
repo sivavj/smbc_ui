@@ -117,23 +117,26 @@ export const Sidebar: React.FC = () => {
       {/* JSON Payload */}
       {JSON.stringify(jsonData) !== "{}" ? (
         <ul>
-          {Object.entries(jsonData).map(([key, value]) => (
-            <li
-              className={`p-4 rounded-md shadow-sm cursor-pointer ${
-                selectedKey === key ? "bg-blue-100" : "hover:bg-gray-100 "
-              }`}
-              key={key}
-              onClick={() => handleClick(key)}
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold">{key}</h2>
-                {renderIcon(value.status)}
-              </div>
-              <p className="text-sm text-gray-600">
-                {value.modified_value || value.value}
-              </p>
-            </li>
-          ))}
+          {Object.entries(jsonData).map(([key, value]) => {
+            const { value: original_value, modified_value, status } = value;
+            return (
+              <li
+                className={`p-4 rounded-md shadow-sm cursor-pointer ${
+                  selectedKey === key ? "bg-blue-100" : "hover:bg-gray-100"
+                }`}
+                key={key}
+                onClick={() => handleClick(key)}
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base font-bold">{key}</h2>
+                  {renderIcon(status)}
+                </div>
+                <p className="text-sm text-gray-600">
+                  {modified_value || original_value}
+                </p>
+              </li>
+            );
+          })}
         </ul>
       ) : (
         <SidebarSkeleton />

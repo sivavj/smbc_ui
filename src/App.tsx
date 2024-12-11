@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ContentArea, Footer, Header, Sidebar } from "./components";
 import { content } from "./data/content";
-import payload from "./data/playload.json";
 import useJsonStore from "./store/jsonStore";
+import  payload  from "./data/playload.json";
 
 function App() {
+  const [cursorPosition, setCursorPosition] = useState({ line: 0, column: 0 });
   const onSetJsonData = useJsonStore((state) => state.onSetJsonData);
 
   const onSetMarkdownContent = useJsonStore(
@@ -36,10 +37,10 @@ function App() {
 
         {/* Content Area */}
         <div className="overflow-y-auto">
-          <ContentArea />
+          <ContentArea setCursorPosition={setCursorPosition} />
         </div>
       </main>
-      <Footer />
+      <Footer cursorPosition={cursorPosition} />
     </div>
   );
 }
