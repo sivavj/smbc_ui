@@ -118,25 +118,6 @@ export const highlightContent = (
   return highlightedContent;
 };
 
-export const getCursorPosition = (
-  selection: Selection | null,
-  markdownElement: HTMLElement
-) => {
-  if (!selection) return null;
-
-  const range = selection.getRangeAt(0);
-  const rect = range.getBoundingClientRect();
-
-  // Get position relative to the top left of the markdown content
-  const offsetTop = rect.top - markdownElement.getBoundingClientRect().top;
-  const offsetLeft = rect.left - markdownElement.getBoundingClientRect().left;
-
-  return {
-    top: offsetTop,
-    left: offsetLeft,
-  };
-};
-
 export function bytesToMB(bytes: number) {
   const mb = bytes / (1024 * 1024);
   return mb.toFixed(2);
@@ -144,4 +125,96 @@ export function bytesToMB(bytes: number) {
 
 export const removeEscapedChars = (str: string) => {
   return str.replace(/\\"/g, '"').replace(/\\\\/g, "");
+};
+
+export const findKeyPosition = (
+  key: string,
+  previewRef: React.MutableRefObject<HTMLDivElement | null>,
+  setCursorPosition: ({
+    line,
+    column,
+  }: {
+    line: number;
+    column: number;
+  }) => void
+) => {
+  if (!previewRef.current) return null;
+
+  const span = previewRef.current.querySelector(`span[id="${key}"]`);
+  if (!span) return null;
+
+  const range = document.createRange();
+  range.selectNode(span);
+  range.setStart(previewRef.current, 0);
+
+  const rangeText = range.toString(); // Get text from start to the `span`
+  const lines = rangeText.split("\n");
+  const lastLine = lines[lines.length - 1];
+
+  const line = lines.length;
+  const column = lastLine.length + 1; // +1 for the column to be 1-based
+
+  setCursorPosition({ line, column });
+  return { line, column };
+};
+
+export const getCursorPosition = (
+  previewRef: React.MutableRefObject<HTMLDivElement | null>,
+  setCursorPosition: ({
+    line,
+    column,
+  }: {
+    line: number;
+    column: number;
+  }) => void
+) => {
+  if (!previewRef.current) return;
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  const range = selection.getRangeAt(0);
+  const startNode = range.startContainer;
+  const startOffset = range.startOffset;
+
+  let line = 1; // Start with line 1
+  let column = 1; // Start with column 1
+  let found = false;
+
+  // Traverse child nodes to calculate line and column
+  const walker = document.createTreeWalker(
+    previewRef.current,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+
+  while (walker.nextNode()) {
+    const currentNode = walker.currentNode as Text;
+
+    if (currentNode === startNode) {
+      // Count lines and columns in the selected node
+      const contentBeforeCursor =
+        currentNode.textContent?.slice(0, startOffset) || "";
+      line += (contentBeforeCursor.match(/\n/g) || []).length;
+      column = startOffset - (contentBeforeCursor.lastIndexOf("\n") + 1);
+      found = true;
+      break;
+    }
+
+    // Update line count based on current node's text
+    const nodeText = currentNode.textContent || "";
+    line += (nodeText.match(/\n/g) || []).length;
+
+    // Update column only if no newlines are present
+    if (!nodeText.includes("\n")) {
+      column += nodeText.length;
+    } else {
+      column = nodeText.length - nodeText.lastIndexOf("\n");
+    }
+  }
+
+  if (found) {
+    setCursorPosition({ line, column });
+  }
+  return { line, column };
 };
