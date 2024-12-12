@@ -118,6 +118,7 @@ export const ContentArea: React.FC<{
             )}
             style={{
               marginTop: "3rem",
+              marginBottom: "3rem",
             }}
           />
         ) : (
