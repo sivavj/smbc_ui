@@ -32,7 +32,7 @@ function App() {
       {/* Main Content */}
       <main
         className="grid min-h-0 flex-grow grid-cols-[1fr_3fr] space-x-2 overflow-hidden"
-        style={{ height: "calc(100vh - 70px)" }}
+        style={{ height: "calc(100vh - 75px)" }}
       >
         {/* Sidebar */}
         <div className="bg-white overflow-y-auto">
