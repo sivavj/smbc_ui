@@ -82,65 +82,71 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="bg-white h-full relative mb-40">
-      <div className="bg-[#505050] py-3 px-2 flex items-center justify-between">
-        <h1 className="text-xl text-white font-bold">Trade Details</h1>
-        <div className="flex items-center gap-2">
+    <div className="h-full relative">
+      <div className="absolute top-0 left-0 right-0 ">
+        <div className="bg-[#505050] py-3 px-2 mb-1 flex items-center justify-between">
+          <h1 className="text-xl text-white font-bold">Trade Details</h1>
+          <div className="flex items-center gap-2">
+            <button
+              className="rounded-full bg-white"
+              onClick={handleUpClick}
+              disabled={selectedKey === null}
+            >
+              <UpArrowIcon />
+            </button>
+            <button
+              className="rounded-full bg-white"
+              onClick={handleDownClick}
+              disabled={selectedKey === null}
+            >
+              <DownArrowIcon />
+            </button>
+          </div>
+        </div>
+        <div className="m-4 bg-white shadow-md">
           <button
-            className="rounded-full bg-white"
-            onClick={handleUpClick}
-            disabled={selectedKey === null}
+            className={`${
+              !isReadyToSend ? "bg-blue-500" : "bg-blue-200"
+            } text-white p-3 w-full flex items-center justify-center gap-2 rounded-md`}
+            onClick={handleAcceptAllClick}
+            disabled={isReadyToSend}
           >
-            <UpArrowIcon />
-          </button>
-          <button
-            className="rounded-full bg-white"
-            onClick={handleDownClick}
-            disabled={selectedKey === null}
-          >
-            <DownArrowIcon />
+            <TickIcon />
+            Accept All
           </button>
         </div>
       </div>
-      <div className="m-4">
-        <button
-          className={`${
-            !isReadyToSend ? "bg-blue-500" : "bg-blue-200"
-          } text-white p-3 w-full flex items-center justify-center gap-2 rounded-md`}
-          onClick={handleAcceptAllClick}
-          disabled={isReadyToSend}
-        >
-          <TickIcon />
-          Accept All
-        </button>
-      </div>
       {/* JSON Payload */}
-      {JSON.stringify(jsonData) !== "{}" ? (
-        <ul>
-          {Object.entries(jsonData).map(([key, value]) => {
-            const { value: original_value, modified_value, status } = value;
-            return (
-              <li
-                className={`p-4 rounded-md shadow-sm cursor-pointer ${
-                  selectedKey === key ? "bg-blue-100" : "hover:bg-gray-100"
-                }`}
-                key={key}
-                onClick={() => handleClick(key)}
-              >
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold">{key}</h2>
-                  {renderIcon(status)}
-                </div>
-                <p className="text-sm text-gray-600">
-                  {modified_value || original_value}
-                </p>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <SidebarSkeleton />
-      )}
+      <div className="h-full overflow-y-auto">
+        {JSON.stringify(jsonData) !== "{}" ? (
+          <ul className="my-[125px]">
+            {Object.entries(jsonData).map(([key, value]) => {
+              const { value: original_value, modified_value, status } = value;
+              return (
+                <li
+                  className={`p-4 rounded-md shadow-sm cursor-pointer ${
+                    selectedKey === key ? "bg-blue-100" : "hover:bg-gray-100"
+                  }`}
+                  key={key}
+                  onClick={() => handleClick(key)}
+                >
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold">{key}</h2>
+                    {renderIcon(status)}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {modified_value || original_value}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="my-[125px]">
+            <SidebarSkeleton />
+          </div>
+        )}
+      </div>
 
       {/* Confirmation Modal */}
       <ConfirmationDialog

@@ -2,7 +2,8 @@ import useJsonStore from "../store/jsonStore";
 
 export const Footer: React.FC<{
   cursorPosition: { line: number; column: number };
-}> = ({ cursorPosition }) => {
+  pageNumber: number;
+}> = ({ cursorPosition, pageNumber }) => {
   const counts = useJsonStore((state) => state.counts);
   return (
     <div className="fixed bottom-0 left-0 right-0">
@@ -34,6 +35,7 @@ export const Footer: React.FC<{
                   Col: <strong>{cursorPosition.column}</strong>
                 </p>
               </div>
+            <div>Page: <strong>{pageNumber}</strong></div>
             </div>
           </div>
         </div>
