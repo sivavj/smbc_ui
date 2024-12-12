@@ -5,10 +5,13 @@ import payload from "./data/playload.json";
 import useJsonStore from "./store/jsonStore";
 
 function App() {
-  const [cursorPosition, setCursorPosition] = useState({ line: 0, column: 0 })
+  const [cursorPosition, setCursorPosition] = useState({ line: 0, column: 0 });
+  const [pageNumber, setPageNumber] = useState(1);
 
   const onSetJsonData = useJsonStore((state) => state.onSetJsonData);
-  const onSetMarkdownContent = useJsonStore((state) => state.onSetMarkdownContent);
+  const onSetMarkdownContent = useJsonStore(
+    (state) => state.onSetMarkdownContent
+  );
 
   // Load data into store
   useEffect(() => {
@@ -20,7 +23,6 @@ function App() {
       onSetJsonData({});
     };
   }, [onSetJsonData, onSetMarkdownContent]);
-
 
   return (
     <div className="container mx-auto min-h-screen flex flex-col">
@@ -44,12 +46,15 @@ function App() {
             height: "100%",
           }}
         >
-          <ContentArea setCursorPosition={setCursorPosition} />
+          <ContentArea
+            setCursorPosition={setCursorPosition}
+            setPageNumber={setPageNumber}
+          />
         </div>
       </main>
 
       {/* Footer */}
-      <Footer cursorPosition={cursorPosition} pageNumber={1} />
+      <Footer cursorPosition={cursorPosition} pageNumber={pageNumber} />
     </div>
   );
 }

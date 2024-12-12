@@ -12,7 +12,8 @@ export const ContentArea: React.FC<{
       column: number;
     }>
   >;
-}> = ({ setCursorPosition }) => {
+  setPageNumber: React.Dispatch<React.SetStateAction<number>>;
+}> = ({ setCursorPosition, setPageNumber }) => {
   const [showEdit, setShowEdit] = useState<boolean>(true);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markdownRef = useRef<any>(null);
@@ -23,6 +24,30 @@ export const ContentArea: React.FC<{
   const onSelectKey = useJsonStore((state) => state.onSelectKey);
   const onSelectContent = useJsonStore((state) => state.onSelectContent);
   const markdownContent = useJsonStore((state) => state.markdownContent);
+
+  // Debug and set up scroll listener
+  useEffect(() => {
+    const contentArea = previewRef.current;
+
+    if (!contentArea) {
+      console.error("ContentAreaRef is null or undefined");
+      return;
+    }
+
+    const handleScroll = () => {
+      const visibleHeight = contentArea.clientHeight;
+      const scrollTop = contentArea.scrollTop;
+      const currentPage = Math.floor(scrollTop / visibleHeight) + 1;
+      setPageNumber(currentPage);
+    };
+
+    contentArea.addEventListener("scroll", handleScroll);
+
+    return () => {
+      contentArea.removeEventListener("scroll", handleScroll);
+    };
+  }, [setPageNumber]);
+
 
   useEffect(() => {
     const handleSelectionChange = () => {
